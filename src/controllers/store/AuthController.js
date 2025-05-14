@@ -1,5 +1,6 @@
 import { Merchant } from "../../models/Merchant.model.js";
 import otpModel from "../../models/otp.model.js";
+import { Store } from "../../models/store.model.js";
 import sendSMS from "../../services/sendSMS.js";
 import Joi from 'Joi';
 import jwt from 'jsonwebtoken';
@@ -49,6 +50,71 @@ export const mobileVerify = async (req, res) => {
   }
 };
 
+// export const verifyOtp = async (req, res) => {
+//   const schema = Joi.object({
+//     mobileNumber: Joi.string().required(),
+//     otp: Joi.string().required(),
+//   });
+
+//   const { error } = schema.validate(req.body);
+//   if (error) return res.status(400).json({ message: error.message });
+
+//   const { mobileNumber, otp } = req.body;
+
+//   try {
+//     const record = await otpModel.findOne({ mobileNumber });
+//     if (!record) {
+//       return res.status(400).json({ message: 'No OTP sent to this number' });
+//     }
+
+//     if (Date.now() > Number(record.otpExpiry)) {
+//       return res.status(400).json({ message: 'OTP expired' });
+//     }
+
+//     if (record.otp == otp) {
+
+//       // ✅ Find the merchant
+//       const merchant = await Merchant.findOne({ Phone: mobileNumber });
+//       let merchantIsActive = null;
+
+//       if (merchant) {
+//         // Update merchant's login count and last login date
+//         merchant.LoginCount += 1;
+//         merchant.LastLoginDate = new Date();
+//         await merchant.save();
+//         merchantIsActive = merchant.IsActive;
+//       } else {
+//         return res.status(400).json({ message: 'Merchant not found' });
+//       }
+
+//       // ✅ Generate JWT token for Merchant
+//       const merchantToken = jwt.sign(
+//         { merchantId: merchant._id, phoneNumber: merchant.Phone },
+//         process.env.JWT_SECRET,
+//         { expiresIn: "30m" }
+//       );
+
+//       return res.status(200).json({
+//         success: true,
+//         message: "OTP verified successfully for Merchant",
+//         token: merchantToken, // Returning Merchant JWT token
+//         isActive: merchantIsActive, // Returning IsActive status
+//         merchantId: merchant._id,
+//         lastLoginDate: merchant.LastLoginDate,
+//         loginCount: merchant.LoginCount,
+//       });
+
+//     } else {
+//       return res.status(400).json({ message: "Invalid OTP, please check again." });
+//     }
+
+//   } catch (err) {
+//     console.error("Server error:", err);
+//     return res.status(500).json({ message: 'Server error during OTP verification' });
+//   }
+// };
+
+
 export const verifyOtp = async (req, res) => {
   const schema = Joi.object({
     mobileNumber: Joi.string().required(),
@@ -70,38 +136,49 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: 'OTP expired' });
     }
 
-    if (record.otp == otp) {
+    if (record.otp === otp) {
 
-      // ✅ Find the merchant
-      const merchant = await Merchant.findOne({ Phone: mobileNumber });
-      let merchantIsActive = null;
+      // ✅ Find the store
+      const store = await Store.findOne({ Phone: mobileNumber });
+      let storeIsActive = null;
 
-      if (merchant) {
-        // Update merchant's login count and last login date
-        merchant.LoginCount += 1;
-        merchant.LastLoginDate = new Date();
-        await merchant.save();
-        merchantIsActive = merchant.IsActive;
+      if (store) {
+        // Check if the store's IsActive status is true
+        storeIsActive = store.IsActive;
+
+        if (!storeIsActive) {
+          return res.status(400).json({
+            success: false,
+            isActive: false,
+            message: 'Store is not active',
+          });
+        }
+
+        // ✅ Update LoginCount and LastLoginDate if the store is active
+        store.LoginCount += 1;
+        store.LastLoginDate = new Date();  // Update to current date
+        await store.save();
+
+        // If store is active, generate JWT token for the store
+        const storeToken = jwt.sign(
+          { storeId: store._id, phoneNumber: store.Phone },
+          process.env.JWT_SECRET,
+          { expiresIn: "30m" }
+        );
+
+        return res.status(200).json({
+          success: true,
+          message: "OTP verified successfully for Store",
+          token: storeToken, // Returning Store JWT token
+          isActive: storeIsActive, // Returning IsActive status
+          storeId: store._id,
+          lastLoginDate: store.LastLoginDate,
+          loginCount: store.LoginCount,
+        });
+
       } else {
-        return res.status(400).json({ message: 'Merchant not found' });
+        return res.status(400).json({ message: 'Store not found' });
       }
-
-      // ✅ Generate JWT token for Merchant
-      const merchantToken = jwt.sign(
-        { merchantId: merchant._id, phoneNumber: merchant.Phone },
-        process.env.JWT_SECRET,
-        { expiresIn: "30m" }
-      );
-
-      return res.status(200).json({
-        success: true,
-        message: "OTP verified successfully for Merchant",
-        token: merchantToken, // Returning Merchant JWT token
-        isActive: merchantIsActive, // Returning IsActive status
-        merchantId: merchant._id,
-        lastLoginDate: merchant.LastLoginDate,
-        loginCount: merchant.LoginCount,
-      });
 
     } else {
       return res.status(400).json({ message: "Invalid OTP, please check again." });

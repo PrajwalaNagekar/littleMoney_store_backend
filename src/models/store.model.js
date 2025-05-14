@@ -11,19 +11,20 @@ const storeSchema = new mongoose.Schema({
   GroupId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'StoreGroup',
-    required: true
   },
   AffiliateId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Affiliate',
-    required: true
+
   },
   AccountId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Account',
-    required: true
+
   },
   IsActive: { type: Boolean, default: true },
+  LoginCount: { type: Number, default: 0 },
+
   AuditFields: {
     type: mongoose.Schema.Types.Mixed,
     default: {}

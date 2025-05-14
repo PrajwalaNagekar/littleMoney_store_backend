@@ -11,17 +11,14 @@ const merchantSchema = new mongoose.Schema({
   GroupId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'StoreGroup',
-    required: true,
   },
   AffiliateId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Affiliate',
-    required: true,
   },
   AccountId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Account',
-    required: true,
   },
 
   LastLoginDate: { type: Date },
