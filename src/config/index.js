@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
 dotenv.config();
-const { SMS_AUTH_KEY, SMS_SENDERID } = process.env;
+const { SMS_AUTH_KEY, SMS_SENDERID, TEMPLATE_ID_STORE_LOGIN, TEMPLATE_ID_CUSTOMER_CONSENT } = process.env;
 
-export { SMS_AUTH_KEY, SMS_SENDERID };
+export { SMS_AUTH_KEY, SMS_SENDERID, TEMPLATE_ID_STORE_LOGIN, TEMPLATE_ID_CUSTOMER_CONSENT };

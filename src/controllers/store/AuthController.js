@@ -4,6 +4,7 @@ import { Store } from "../../models/store.model.js";
 import sendSMS from "../../services/sendSMS.js";
 import Joi from 'Joi';
 import jwt from 'jsonwebtoken';
+import StoreLoginOtpsModel from "../../models/StoreLoginOtps.model.js";
 
 export const mobileVerify = async (req, res) => {
   const mobileVerifySchema = Joi.object({
@@ -21,14 +22,14 @@ export const mobileVerify = async (req, res) => {
     if (mobileNumber) {
       const otp = Math.floor(100000 + Math.random() * 900000);
       console.log("🚀 ~ mobileVerify ~ otp:", otp)
-      const message = `${otp} is your OTP to complete your loan application with Little Money`;
+      const message = `${otp} is your OTP to login to LittleMoney portal`;
 
       await sendSMS(mobileNumber, message);
 
       const otpExpiry = Date.now() + 5 * 60 * 1000;
       console.log("🚀 ~ mobileVerify ~ otpExpiry:", otpExpiry);
 
-      const otpDoc = await otpModel.findOneAndUpdate(
+      const otpDoc = await StoreLoginOtpsModel.findOneAndUpdate(
         { mobileNumber },
         { mobileNumber, otp, otpExpiry },
         { upsert: true, new: true }
@@ -49,6 +50,9 @@ export const mobileVerify = async (req, res) => {
     return res.status(500).json({ message: error.message || "Internal Server Error" });
   }
 };
+
+
+
 
 // export const verifyOtp = async (req, res) => {
 //   const schema = Joi.object({
@@ -127,7 +131,7 @@ export const verifyOtp = async (req, res) => {
   const { mobileNumber, otp } = req.body;
 
   try {
-    const record = await otpModel.findOne({ mobileNumber });
+    const record = await StoreLoginOtpsModel.findOne({ mobileNumber });
     if (!record) {
       return res.status(400).json({ message: 'No OTP sent to this number' });
     }
@@ -138,8 +142,8 @@ export const verifyOtp = async (req, res) => {
 
     if (record.otp === otp) {
 
-      // ✅ Find the store
-      const store = await Store.findOne({ Phone: mobileNumber });
+      //  Find the store
+      const store = await Store.findOne({ Phone: mobileNumber }).populate('MerchantId');;
       let storeIsActive = null;
 
       if (store) {
@@ -154,9 +158,9 @@ export const verifyOtp = async (req, res) => {
           });
         }
 
-        // ✅ Update LoginCount and LastLoginDate if the store is active
+        //  Update LoginCount and LastLoginDate if the store is active
         store.LoginCount += 1;
-        store.LastLoginDate = new Date();  // Update to current date
+        store.lastLoginDate = new Date();  // Update to current date
         await store.save();
 
         // If store is active, generate JWT token for the store
@@ -172,7 +176,13 @@ export const verifyOtp = async (req, res) => {
           token: storeToken, // Returning Store JWT token
           isActive: storeIsActive, // Returning IsActive status
           storeId: store._id,
-          lastLoginDate: store.LastLoginDate,
+          storeName: store.Name,
+          storeEmail: store.Email,
+          storePhone: store.Phone,
+          storeMerchant: store.MerchantId,
+          storeMerchantName: store.MerchantId?.Name || null, // new field
+
+          lastLoginDate: store.lastLoginDate,
           loginCount: store.LoginCount,
         });
 

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { SMS_AUTH_KEY, SMS_SENDERID } from "../config/index.js";
+import { SMS_AUTH_KEY, SMS_SENDERID, TEMPLATE_ID_STORE_LOGIN } from "../config/index.js";
 
 const sendSMS = async (mobileNumber, message) => {
   try {
@@ -7,7 +7,7 @@ const sendSMS = async (mobileNumber, message) => {
       message: message,
       senderId: SMS_SENDERID,
       number: mobileNumber,
-      templateId: "1707174322921125247",
+      templateId: TEMPLATE_ID_STORE_LOGIN,
     });
 
     const config = {
@@ -39,6 +39,6 @@ const sendSMS = async (mobileNumber, message) => {
 };
 // sendSMS(
 //     "9765652199",
-//     "555555 is your OTP to complete your loan application with Little Money"
+//     "555555 isis your OTP to login to LittleMoney portal"
 // );
 export default sendSMS;

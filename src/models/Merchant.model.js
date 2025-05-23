@@ -7,19 +7,20 @@ const merchantSchema = new mongoose.Schema({
   Email: { type: String },
   State: { type: String },
   GSTIN: { type: String },
+  Description:{ type: String, required: false },
 
-  GroupId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'StoreGroup',
-  },
-  AffiliateId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Affiliate',
-  },
-  AccountId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Account',
-  },
+  // GroupId: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'StoreGroup',
+  // },
+  // AffiliateId: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'Affiliate',
+  // },
+  // AccountId: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'Account',
+  // },
 
   LastLoginDate: { type: Date },
   LoginCount: { type: Number, default: 0 },
