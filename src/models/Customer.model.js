@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { applyAuditMiddleware } from '../Utils/auditFieldsHelper';
 
 const customerSchema = new mongoose.Schema({
     mobileNumber: {
@@ -21,12 +20,10 @@ const customerSchema = new mongoose.Schema({
     employment_type_id: {
         type: String,
         default: 'Salaried',
-        enum: ['Salaried'], // restricts it to only 'Salaried'
-
+        enum: ['Salaried'] // restricts it to only 'Salaried'
     },
     eligibility_status: {
-        type: Boolean,
-        default: false
+        type: Boolean
     },
     pan: {
         type: String,
@@ -52,16 +49,31 @@ const customerSchema = new mongoose.Schema({
         default: false
     },
     consent_timestamp: {
-        type: Date,
+        type: Date
     },
-    AuditFields: {
-        type: mongoose.Schema.Types.Mixed,
-        default: {}
+    message: {
+        type: String
     },
+
+    max_eligibility_amount: {
+        type: String
+    },
+    eligibility_expiry_date: {
+        type: Date
+    },
+    tenure: {
+        type: Number
+    },
+    data: {
+        type: mongoose.Schema.Types.Mixed
+    },
+    ChainStoreId: {
+        type: mongoose.Schema.Types.ObjectId,
+    },
+    storeId: {
+        type: mongoose.Schema.Types.ObjectId,
+    }
 }, {
-    timestamps: true 
+    timestamps: true
 });
-applyAuditMiddleware(customerSchema);
-
-
-export default mongoose.model('Customer', customerSchema);
+export const Customer = mongoose.model('Customer', customerSchema)

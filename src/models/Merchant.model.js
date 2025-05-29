@@ -1,25 +1,31 @@
 import mongoose from 'mongoose';
+import { applyAuditMiddleware } from '../Utils/auditFieldsHelper.js';
 
-const merchantSchema = new mongoose.Schema({
+const chainStoreSchema = new mongoose.Schema({
+  // GroupId: { type: String, default: () => `GRID_${new mongoose.Types.ObjectId()}` },
+
   Name: { type: String, required: true },
-  Address: { type: String },
-  Phone: { type: String },
-  Email: { type: String },
-  State: { type: String },
-  GSTIN: { type: String },
-  Description:{ type: String, required: false },
+  Address: { type: String, required: false },
+  Phone: { type: String, required: true, unique: true },
+  Email: { type: String, required: false },
+  State: { type: String, required: false },
+  GSTIN: { type: String, required: false },
+  Description: { type: String, required: false },
 
-  // GroupId: {
+  //   GroupId: {
   //   type: mongoose.Schema.Types.ObjectId,
   //   ref: 'StoreGroup',
+  //   required: false,
   // },
-  // AffiliateId: {
+  //   AffiliateId: {
   //   type: mongoose.Schema.Types.ObjectId,
   //   ref: 'Affiliate',
+  //   required: false,
   // },
-  // AccountId: {
+  //   AccountId: {
   //   type: mongoose.Schema.Types.ObjectId,
   //   ref: 'Account',
+  //   required: false,
   // },
 
   LastLoginDate: { type: Date },
@@ -34,21 +40,7 @@ const merchantSchema = new mongoose.Schema({
   timestamps: true
 });
 
-merchantSchema.pre('save', function (next) {
-  const now = new Date();
-  if (this.isNew) {
-    this.AuditFields = {
-      createdBy: 'system',
-      createdAt: now
-    };
-  } else {
-    this.AuditFields = {
-      ...(this.AuditFields || {}),
-      updatedBy: 'system',
-      updatedAt: now
-    };
-  }
-  next();
-});
+applyAuditMiddleware(chainStoreSchema)
 
-export const Merchant = mongoose.model('Merchant', merchantSchema);
+
+export const Merchant = mongoose.model('ChainStore', chainStoreSchema);

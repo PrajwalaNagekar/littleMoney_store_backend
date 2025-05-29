@@ -39,6 +39,6 @@ const sendSMS = async (mobileNumber, message) => {
 };
 // sendSMS(
 //     "9765652199",
-//     "555555 isis your OTP to login to LittleMoney portal"
+//     "555555 is your OTP to login to LittleMoney portal"
 // );
 export default sendSMS;

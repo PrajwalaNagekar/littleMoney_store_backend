@@ -22,7 +22,7 @@ export const mobileVerify = async (req, res) => {
     if (mobileNumber) {
       const otp = Math.floor(100000 + Math.random() * 900000);
       console.log("🚀 ~ mobileVerify ~ otp:", otp)
-      const message = `${otp} is your OTP to login to LittleMoney portal`;
+      const message = `${otp} is your OTP to login to LittleMoney portal.`;
 
       await sendSMS(mobileNumber, message);
 
@@ -143,7 +143,7 @@ export const verifyOtp = async (req, res) => {
     if (record.otp === otp) {
 
       //  Find the store
-      const store = await Store.findOne({ Phone: mobileNumber }).populate('MerchantId');;
+      const store = await Store.findOne({ Phone: mobileNumber }).populate('ChainStoreId');;
       let storeIsActive = null;
 
       if (store) {
@@ -165,10 +165,25 @@ export const verifyOtp = async (req, res) => {
 
         // If store is active, generate JWT token for the store
         const storeToken = jwt.sign(
-          { storeId: store._id, phoneNumber: store.Phone },
+          {
+            storeId: store._id,
+            phoneNumber: store.Phone,
+            storeName: store.Name,
+            email: store.Email,
+            state: store.State,
+            gstin: store.GSTIN,
+            affiliateId: store.AffiliateId,
+            accountId: store.AccountId,
+            ChainStoreId: store.ChainStoreId,
+            StoreCode: store.StoreCode,
+            pinCode: store.pinCode,
+            ifscCode: store.ifscCode,
+            isActive: store.IsActive,
+          },
           process.env.JWT_SECRET,
-          { expiresIn: "30m" }
+
         );
+
 
         return res.status(200).json({
           success: true,
@@ -179,8 +194,9 @@ export const verifyOtp = async (req, res) => {
           storeName: store.Name,
           storeEmail: store.Email,
           storePhone: store.Phone,
-          storeMerchant: store.MerchantId,
-          storeMerchantName: store.MerchantId?.Name || null, // new field
+          storeMerchant: store.ChainStoreId,
+          storeMerchantName: store.ChainStoreId?.Name || null, // new field
+          StoreCode: store.StoreCode,
 
           lastLoginDate: store.lastLoginDate,
           loginCount: store.LoginCount,
